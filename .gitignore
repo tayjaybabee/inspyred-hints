@@ -79,3 +79,15 @@ dmypy.json
 .pyre/
 .pytype/
 cython_debug/
+/.idea/.gitignore
+/.idea/.name
+/.idea/codestream.xml
+/.idea/discord.xml
+/.idea/GitLink.xml
+/.idea/inspyred-hints.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/JetClient/state.xml
+/.idea/vcs.xml

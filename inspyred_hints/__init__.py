@@ -1,71 +1,76 @@
+from __future__ import annotations
+
 from time import sleep
 from threading import Thread
 
 
-def get_hints(obj):
+def get_hints(obj, section_name: str = None, case_sensitive: bool = False):
     """
-    Extracts a specific section from the docstring of the given object.
-    This function searches for a section titled 'Resolution hints' within the docstring of the provided object.
-    It then formats and returns the contents of this section as a list of strings.
+    Searches for the given section in the docstring;
+        - If the section is found, it is returned as a list of strings.
+        - If the section is not found, an empty list is returned.
 
-    Args:
-        obj (object): The object whose docstring is to be parsed.
+    Arguments:
+        obj (Exception|HelpfulError):
+            The docstring in which to search for the section.
 
-    Returns:
-        list of str: The formatted hints extracted from the docstring. Each hint is a string in the returned list.
-        str: A message indicating the section was not found if 'Resolution hints' is not present in the docstring.
+        section_name (string):
+            The name of the section to search for. Defaults to 'Resolution hints'.
 
-    Raises:
-        ValueError: If the docstring does not contain the term 'Resolution hints'.
-
-    Examples:
-        >>> class Example:
-        ...     '''This is an example class.
-        ...
-        ...     Resolution hints
-        ...         - Hint 1
-        ...         - Hint 2
-        ...     '''
-        ...
-        >>> get_hints(Example)
-        ['Hint 1', 'Hint 2']
-
-    Note:
-        The function assumes the hints section is formatted with each hint preceded by '        - '.
+        case_sensitive (bool):
+            Whether the section search should be case-sensitive. Defaults to False.
     """
-    term = 'Resolution hints'
+    docstr = obj.__doc__
 
-    # Grab docstring for object
-    doc = obj.__doc__
+    if docstr is None:
+        return []
 
-    if not doc:
-        raise ValueError(f'Docstring not found in the provided object.')
+    section_name = section_name or "Resolution hints"
 
-    # Get the index for the section.
-    try:
-        # Find the start of the target section
-        start = doc.index(term) + len(term)
+    if not case_sensitive:
+        docstr = docstr.lower()
+        section_name = section_name.lower()
 
-        # Find the end of the target section or end of the docstring if no other section follows.
-        end = doc.find('\n\n', start)
-        if end == -1:
-            end = len(doc)
+    hints_section = find_hint_section(docstr, section_name)
 
-        # Grab the text from the target section.
-        hints = doc[start:end].strip()
+    hints = hints_section.split("\n")
 
-    except ValueError:
-        return f'Section "{term}" not found in docstring.'
-
-    # Format the hints before returning
-    # Break up the hints into a list of strings by newlines.
-    hints = hints.split('\n')
-
-    # Ignore the first line.
+    # Drop the first line
     hints = hints[1:]
 
-    # Strip the leading spaces and '-' from each line before returning.
-    return [hint.lstrip(' -') for hint in hints]
+    return [hint.lstrip(" -") for hint in hints]
+
+
+def find_hint_section(docstr, section_name):
+    try:
+        # Find the start of the target section
+        start = docstr.index(section_name) + len(section_name)
+
+        # Find  the end
+        end = docstr.find("\n\n", start)
+
+        if end == -1:
+            end = len(docstr)
+
+        # Grab the text from the target section.
+        hints = docstr[start:end].strip()
+    except ValueError as e:
+        raise ValueError(f'Section "{section_name}" not found in docstring.') from e
+
+    return hints
+
+
+def asynchronous_hints(delay: (int | float)):
+    def wrapper(func):
+        def wrapper2(*args, **kwargs):
+            t = Thread(target=func, args=args, kwargs=kwargs)
+            t.start()
+            sleep(delay)
+            return t
+
+        return wrapper2
+
+    return wrapper
 
 
 def print_hints(obj, delay=2):
@@ -109,14 +114,6 @@ def print_hints(obj, delay=2):
     # Get the hints
     hints = get_hints(obj)
 
-    def print_hints_thread(delay):
-        sleep(delay)
-
-        print(f'\nSome hints for "{obj.__class__.__name__}":\n')
-
-        for hint in hints:
-            print(f'  - {hint}')
-
-    thread = Thread(target=print_hints_thread, daemon=True, args=[delay])
+    thread = Thread(target=asynchronous_hints, daemon=True, args=[delay])
 
     thread.start()

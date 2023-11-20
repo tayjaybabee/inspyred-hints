@@ -1,4 +1,6 @@
 from inspyred_hints import get_hints, print_hints
+from threading import Thread
+import time
 
 
 class HelpfulError(Exception):
@@ -8,22 +10,28 @@ class HelpfulError(Exception):
         self.use_parent_hints = use_parent_hints
 
     def print_hints(self):
+        hints = get_hints(self)
 
-        section_title = 'Resolution hints'.lower()
+        if not hints and self.use_parent_hints:
+            # Pass the parent class to the `get_hints` function.
+            hints = get_hints(self.__class__)
 
-        if self.__doc__:
-            l_doc = self.__doc__.lower()
-            # Check if the current class has resolution hints.
-            if section_title in l_doc:
-                return print_hints(self)
-            else:
-                if self.use_parent_hints:
-                    parent = self.__class__.__bases__[0]
-                    p_l_doc = parent.__doc__.lower()
-                    if parent.__doc__ and self.use_parent_hints:
-                        if section_title in p_l_doc:
-                            return print_hints(parent)
+        lines = [f"\nSome hints for {self.__class__.__name__}:\n"]
 
+        for hint in hints:
+            lines.append(f"  - {hint}")
+
+        # Create a new thread to print the hints after a delay.
+        hint_thread = Thread(target=self._print_hints, args=[lines])
+        hint_thread.start()
+
+    def _print_hints(self, lines):
+
+        # Delay before printing the hints.
+        time.sleep(self.delay)
+
+        # Print the hints.
+        print("\n".join(lines))
 
     @property
     def delay(self):

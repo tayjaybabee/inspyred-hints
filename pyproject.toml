@@ -6,8 +6,15 @@ authors = ["Taylor B. <tayjaybabee@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.9"
 
+
+[tool.poetry.group.dev.dependencies]
+sourcery = "^1.14.0"
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.2.6"
 
 [build-system]
 requires = ["poetry-core"]

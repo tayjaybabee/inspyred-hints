@@ -1,13 +1,22 @@
 from inspyred_hints import get_hints, print_hints
+from inspyred_hints.common.interactive import is_interactive, simulate_enter_keypress
+
 from threading import Thread
 import time
 
 
+
 class HelpfulError(Exception):
     def __init__(self, message, delay=2, use_parent_hints=True):
+
         super().__init__(message)
         self.delay = delay
         self.use_parent_hints = use_parent_hints
+
+
+    @property
+    def is_interactive(self):
+        return is_interactive()
 
     def print_hints(self):
         hints = get_hints(self)
@@ -32,6 +41,8 @@ class HelpfulError(Exception):
 
         # Print the hints.
         print("\n".join(lines))
+
+        return
 
     @property
     def delay(self):

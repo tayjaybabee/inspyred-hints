@@ -7,8 +7,8 @@ from threading import Thread
 def get_hints(obj, section_name: str = None, case_sensitive: bool = False):
     """
     Searches for the given section in the docstring;
-        - If the section is found, it is returned as a list of strings.
-        - If the section is not found, an empty list is returned.
+        - If the section is found, it's returned as a list of strings.
+        - If the section isn't found, an empty list is returned.
 
     Arguments:
         obj (Exception|HelpfulError):
@@ -42,6 +42,23 @@ def get_hints(obj, section_name: str = None, case_sensitive: bool = False):
 
 
 def find_hint_section(docstr, section_name):
+    """
+    Finds and returns the specified section from the given docstring.
+
+    Parameters:
+        docstr (str):
+            The docstring to search.
+
+        section_name (str):
+            The name of the section to find.
+
+    Returns:
+        str: The text of the specified section from the docstring.
+
+    Raises:
+        ValueError:
+            If the specified section isn't found in the docstring.
+    """
     try:
         # Find the start of the target section
         start = docstr.index(section_name) + len(section_name)
